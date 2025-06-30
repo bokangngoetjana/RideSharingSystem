@@ -126,11 +126,9 @@ namespace RideSharingSystem
                 string role = parts[2];
                 string name = parts[3];
 
-                bool passwordMatches = storedPassword.Length == 44 
-                    ? inputHashedPassword == storedPassword
-                    : password == storedPassword; // Check if the password is hashed or plain text
+                password = storedPassword;
 
-                if (username == storedUsername && password == storedPassword)
+                if (username == storedUsername && storedPassword == inputHashedPassword)
                 {
                     Console.WriteLine($"Login successful. Welcome {name} ({role})!");
 
