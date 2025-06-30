@@ -94,7 +94,7 @@ namespace RideSharingSystem
             }
         }
         private static bool UsernameExists(string username)
-        {
+        {  
             if(!File.Exists(filePath)) return false;
 
             return File.ReadAllLines(filePath)
@@ -112,6 +112,7 @@ namespace RideSharingSystem
 
             Console.Write("Enter password: ");
             string password = Console.ReadLine();
+            string inputHashedPassword = HashPassword(password);
 
             var lines =File.ReadAllLines(filePath);
 
@@ -124,6 +125,10 @@ namespace RideSharingSystem
                 string storedPassword = parts[1];
                 string role = parts[2];
                 string name = parts[3];
+
+                bool passwordMatches = storedPassword.Length == 44 
+                    ? inputHashedPassword == storedPassword
+                    : password == storedPassword; // Check if the password is hashed or plain text
 
                 if (username == storedUsername && password == storedPassword)
                 {
