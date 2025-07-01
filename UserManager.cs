@@ -134,21 +134,26 @@ namespace RideSharingSystem
 
                     if (role == "Passenger")
                     {
-                        return new Passenger
+                        var passenger =  new Passenger
                         {
                             Username = storedUsername,
                             Password = storedPassword,
                             Name = name
                         };
+                        passenger.LoadWalletBalance();
+                        passenger.LoadRideHistory();
+                        return passenger;
                     }
                     else if (role == "Driver")
                     {
-                        return new Driver
+                        var driver =  new Driver
                         {
                             Username = storedUsername,
                             Password = storedPassword,
                             Name = name
                         };
+                        driver.LoadEarnings();
+                        return driver;
                     }
                 }
             }

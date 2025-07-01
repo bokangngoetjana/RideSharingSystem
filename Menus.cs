@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.CompilerServices;
 
 namespace RideSharingSystem
 {
@@ -76,7 +76,6 @@ namespace RideSharingSystem
                     Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pick-up: {ride.PickUpLocation.Name}, Drop-off: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}");
                 }
             }
-
                 Console.ReadLine();
         }
 
@@ -92,6 +91,7 @@ namespace RideSharingSystem
                 Console.ReadLine();
                 return;
             }
+
             Console.Write("Enter Ride ID to accept: ");
             if (int.TryParse(Console.ReadLine(), out int rideId))
             {
@@ -100,6 +100,14 @@ namespace RideSharingSystem
                 {
                     ride.Status = RideStatus.Accepted;
                     ride.Driver = driver;
+
+                    //Deduct fare from passenger's wallet balance after accepting ride
+                    ride.Passenger.WalletBalance -= ride.Fare;
+                    ride.Passenger.SaveWalletBalance();
+
+                    driver.Earnings += ride.Fare;
+                    driver.SaveEarnings();
+                    RideManager.UpdateRideInHistory(ride);
                     Console.WriteLine("Ride accepted.");
                 }
                 else
@@ -135,9 +143,8 @@ namespace RideSharingSystem
                     ride.Status = RideStatus.Completed;
                     ride.IsCompleted = true;
 
-                    driver.Earnings += ride.Fare;
-                    ride.Passenger.WalletBalance -= ride.Fare;
-
+                    driver.SaveEarnings();
+                    RideManager.UpdateRideInHistory (ride);
                     Console.WriteLine("Ride completed.");
                 }
                 else
@@ -155,7 +162,7 @@ namespace RideSharingSystem
 
         public static void ViewEarnings(Driver driver)
         {
-            Console.WriteLine($"Total Earnings: ${driver.Earnings:F2}");
+            Console.WriteLine($"Total Earnings: R{driver.Earnings:F2}");
             Console.ReadLine();
         }
 
@@ -245,22 +252,72 @@ namespace RideSharingSystem
         }
         public static void ViewRideHistory(Passenger passenger)
         {
-            if (passenger.RideHistory.Count == 0)
+            const string RideHistoryPath = "ride_history.txt";
+
+            if (!File.Exists(RideHistoryPath))
+            {
+                Console.WriteLine("No ride history found.");
+                Console.ReadLine();
+                return;
+            }
+
+            var lines = File.ReadAllLines(RideHistoryPath)
+                .Where(line => line.Split(',')[1] == passenger.Username)
+                .ToList();
+
+            if (!lines.Any())
             {
                 Console.WriteLine("No rides found.");
             }
             else
             {
-                foreach (var ride in passenger.RideHistory)
+                foreach (var line in lines)
                 {
-                    Console.WriteLine($"Ride ID: {ride.Id}, Driver: {ride.Driver?.Name}, Fare: R{ride.Fare}, Completed: {ride.IsCompleted}");
+                    var parts = line.Split(',');
+
+                    string driver = string.IsNullOrEmpty(parts[2]) ? "N/A" : parts[2];
+                    string pickup = parts[3];
+                    string dropoff = parts[4];
+                    string fare = parts[5];
+                    string status = parts[6];
+                    string completed = parts[7];
+
+                    Console.WriteLine($"Ride ID: {parts[0]}, Driver: {driver}, Pickup: {pickup}, Dropoff: {dropoff}, Fare: R{fare}, Status: {status}, Completed: {completed}");
                 }
             }
+
             Console.ReadLine();
         }
+
         public static void RateDriver(Passenger passenger)
         {
-            Console.WriteLine("Rate driver feature coming soon.");
+            var completedRides = passenger.RideHistory
+               .Where(r => r.IsCompleted && r.Driver != null)
+               .ToList();
+
+            if (!completedRides.Any())
+            {
+                Console.WriteLine("No completed rides available to rate.");
+                Console.ReadLine();
+                return;
+            }
+
+            foreach (var ride in completedRides)
+            {
+                Console.WriteLine($"Ride ID: {ride.Id}, Driver: {ride.Driver.Username}");
+            }
+            Console.Write("Enter Ride ID to rate: ");
+            if (int.TryParse(Console.ReadLine(), out int rideId))
+            {
+                var ride = completedRides.FirstOrDefault(r => r.Id == rideId);
+                if (ride != null)
+                {
+                    Console.Write($"Rate driver {ride.Driver.Username} (1–5): ");
+                    string rating = Console.ReadLine();
+                    Console.WriteLine($"Thank you! You rated {ride.Driver.Username} a {rating}/5.");
+                }
+            }
+
             Console.ReadLine();
         }
     }
