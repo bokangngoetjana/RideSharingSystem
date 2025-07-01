@@ -10,7 +10,7 @@ namespace RideSharingSystem
         public decimal Earnings { get; set; } = 0;
         public List<Ride> AcceptedRides { get; set; } = new List<Ride>();
         public List<int> Ratings { get; set; } = new List<int>();
-
+        public bool IsFlaggedForReview { get; set; } = false;
         public Driver()
         {
             Role = "Driver";

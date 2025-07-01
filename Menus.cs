@@ -30,7 +30,8 @@ namespace RideSharingSystem
                 Console.WriteLine("2. Accept a Ride");
                 Console.WriteLine("3. Complete a Ride");
                 Console.WriteLine("4. View Earnings");
-                Console.WriteLine("5. Logout");
+                Console.WriteLine("5. View Completed Rides");
+                Console.WriteLine("6. Logout");
                 Console.Write("Choose an option: ");
 
                 string choice = Console.ReadLine();
@@ -50,6 +51,9 @@ namespace RideSharingSystem
                         ViewEarnings(driver);
                         break;
                     case "5":
+                        ViewCompletedRides(driver);
+                        break;
+                    case "6":
                         Console.WriteLine("Logging out...");
                         return;
                     default:
@@ -59,6 +63,37 @@ namespace RideSharingSystem
                 }
             }
         }
+        public static void ViewCompletedRides(Driver driver)
+        {
+            try
+            {
+                var completedRides = RideManager.AllRides
+                    .Where(r => r.Driver != null && r.Driver.Username == driver.Username && r.IsCompleted)
+                    .ToList();
+
+                if (!completedRides.Any())
+                {
+                    Console.WriteLine("You have no completed rides.");
+                }
+                else
+                {
+                    Console.WriteLine("=== Completed Rides ===");
+                    foreach (var ride in completedRides)
+                    {
+                        Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pickup: {ride.PickUpLocation.Name}, Dropoff: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}, Status: {ride.Status}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while fetching completed rides.");
+                Console.WriteLine($"Details: {ex.Message}");
+            }
+
+            Console.WriteLine("Press Enter to continue...");
+            Console.ReadLine();
+        }
+
         public static void ViewAvailableRides(Driver driver)
         {
             var pendingRides = RideManager.AllRides
@@ -314,8 +349,26 @@ namespace RideSharingSystem
                 {
                     Console.Write($"Rate driver {ride.Driver.Username} (1–5): ");
                     string rating = Console.ReadLine();
+                    if (int.TryParse(rating, out int score) && score >= 1 && score <= 5)
+                    {
+                        ride.Driver.Ratings.Add(score);
+
+                        double avg = ride.Driver.GetAverageRating();
+                        if (avg < 3)
+                        {
+                            ride.Driver.IsFlaggedForReview = true;
+                            Console.WriteLine($"Driver {ride.Driver.Name} has been flagged for review due to low ratings.");
+                        }
+                        Console.WriteLine($"Thank you! You rated {ride.Driver.Name} a {score}/5.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid rating. Must be a number between 1 and 5.");
+                    }
+
                     Console.WriteLine($"Thank you! You rated {ride.Driver.Username} a {rating}/5.");
                 }
+
             }
 
             Console.ReadLine();
