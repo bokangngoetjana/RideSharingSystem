@@ -9,19 +9,20 @@ namespace RideSharingSystem
 {
     public class RideManager
     {
-        public static string RideFilePath = "rides.txt";
+        public static string RideFilePath = "ride_history.txt";
+        public static int NextRideId = 1;
         public static List<Ride> AllRides { get; set; } = new List<Ride>();
 
         public static string RidesCSV(Ride ride)
         {
-            return $"{ride.Id},{ride.Passenger.Username},{ride.Driver?.Username ?? ""},{ride.PickUpLocation.Name},{ride.DropOffLocation.Name},{ride.Fare},{ride.Status}";
+            return $"{ride.Id},{ride.Passenger.Username},{ride.Driver?.Username ?? ""},{ride.PickUpLocation.Name},{ride.DropOffLocation.Name},{ride.Fare},{ride.Status},{ride.IsCompleted}";
         }
 
         public static Ride RideFromCsv(string line, List<Passenger> passengers, List<Driver> drivers, List<Location> locations)
         {
             var parts = line.Split(',');
 
-            if (parts.Length < 7)
+            if (parts.Length < 8)
                 throw new InvalidDataException("Invalid ride data line.");
 
             int id = int.Parse(parts[0]);
@@ -31,6 +32,7 @@ namespace RideSharingSystem
             string dropoffName = parts[4];
             decimal fare = decimal.Parse(parts[5]);
             RideStatus status = (RideStatus)Enum.Parse(typeof(RideStatus), parts[6]);
+            bool isCompleted = bool.Parse(parts[7]);
 
             var passenger = passengers.FirstOrDefault(p => p.Username == passengerUsername);
             var driver = string.IsNullOrEmpty(driverUsername) ? null : drivers.FirstOrDefault(d => d.Username == driverUsername);
@@ -50,7 +52,8 @@ namespace RideSharingSystem
                 PickUpLocation = pickupLoc,
                 DropOffLocation = dropoffLoc,
                 Fare = fare,
-                Status = status
+                Status = status,
+                IsCompleted = isCompleted,
             };
         }
         // Load all rides from file, resolving references
@@ -70,6 +73,10 @@ namespace RideSharingSystem
                 var ride = RideFromCsv(line, passengers, drivers, locations);
                 rides.Add(ride);
             }
+            if (rides.Any())
+            {
+                NextRideId = rides.Max(r => r.Id) + 1;
+            }
 
             return rides;
         }
@@ -86,6 +93,31 @@ namespace RideSharingSystem
         {
             var line = RidesCSV(ride);
             File.AppendAllLines(RideFilePath, new[] { line });
+        }
+        public static void UpdateRideInHistory(Ride updatedRide)
+        {
+            string filePath = "ride_history.txt";
+
+            if (!File.Exists(filePath)) return;
+
+            var lines = File.ReadAllLines(filePath).ToList();
+            for(int i = 0; i < lines.Count; i++)
+            {
+                var parts = lines[i].Split(',');
+                if (int.Parse(parts[0]) == updatedRide.Id)
+                {
+                    lines[i] = $"{updatedRide.Id}," +
+                       $"{updatedRide.Passenger.Username}," +
+                       $"{updatedRide.Driver?.Username ?? ""}," +
+                       $"{updatedRide.PickUpLocation.Name}," +
+                       $"{updatedRide.DropOffLocation.Name}," +
+                       $"{updatedRide.Fare}," +
+                       $"{updatedRide.Status}," +
+                       $"{updatedRide.IsCompleted}";
+                    break;
+                }
+            }
+            File.WriteAllLines(filePath, lines);
         }
     }
 }

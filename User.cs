@@ -13,6 +13,5 @@ namespace RideSharingSystem
         public string Password { get; set; }
         public string Role { get; protected set; } 
         public string Username { get; set; }
-       // public List<int> Ratings { get; set; }
     }
 }

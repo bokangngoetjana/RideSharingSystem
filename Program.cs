@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace RideSharingSystem
 {
@@ -6,7 +7,18 @@ namespace RideSharingSystem
     {
         static void Main(string[] args)
         {
-            while(true)
+            List<Passenger> passengers = Passenger.LoadAllPassengers();
+            List<Driver> drivers = Driver.LoadAllDrivers();
+            // Initial loading of data (locations, users)
+            List<Location> locations = new List<Location>
+            {
+                new Location("pta"),
+                new Location("jhb"),
+                new Location("pe"),
+                new Location("dbn"),
+                new Location("cpt")
+            };
+            while (true)
             {
                 Console.WriteLine("\n=== Ride-Sharing App ===");
                 Console.WriteLine("1. Register");
@@ -23,14 +35,19 @@ namespace RideSharingSystem
                         break;
                     case "2":
                         var user = UserManager.Login();
-                        if(user is Passenger passenger)
+                        if(user != null)
                         {
-                            Menus.PassengerMenu(passenger);
+                            RideManager.AllRides = RideManager.LoadAllRides(passengers, drivers, locations);
+                            if (user is Passenger passenger)
+                            {
+                                Menus.PassengerMenu(passenger);
+                            }
+                            else if (user is Driver driver)
+                            {
+                                Menus.DriverMenu(driver);
+                            }
                         }
-                        else if(user is Driver driver)
-                        {
-                            Menus.DriverMenu(driver);
-                        }
+                       
                         break;
                     case "3":
                         return;
