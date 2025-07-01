@@ -61,18 +61,95 @@ namespace RideSharingSystem
         }
         public static void ViewAvailableRides(Driver driver)
         {
-            Console.WriteLine("Feature to list available rides coming soon.");
-            Console.ReadLine();
+            var pendingRides = RideManager.AllRides
+                .Where(r => r.Status == RideStatus.Pending)
+                .ToList();
+
+            if (!pendingRides.Any())
+            {
+                Console.WriteLine("No available ride requests.");
+            }
+            else
+            {
+                foreach(var ride in pendingRides)
+                {
+                    Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pick-up: {ride.PickUpLocation.Name}, Drop-off: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}");
+                }
+            }
+
+                Console.ReadLine();
         }
 
         public static void AcceptRide(Driver driver)
         {
-           // List<Ride> rides = RideManager.LoadAllRides(passengers, drivers, locations);
+            var pendingRides = RideManager.AllRides
+                .Where(ride => ride.Status == RideStatus.Pending)
+                .ToList();
+
+            if (!pendingRides.Any())
+            {
+                Console.WriteLine("No rides to accept.");
+                Console.ReadLine();
+                return;
+            }
+            Console.Write("Enter Ride ID to accept: ");
+            if (int.TryParse(Console.ReadLine(), out int rideId))
+            {
+                var ride = pendingRides.FirstOrDefault(r => r.Id == rideId);
+                if (ride != null)
+                {
+                    ride.Status = RideStatus.Accepted;
+                    ride.Driver = driver;
+                    Console.WriteLine("Ride accepted.");
+                }
+                else
+                {
+                    Console.WriteLine("Ride not found.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid Ride ID.");
+            }
+            Console.ReadLine();
         }
 
         public static void CompleteRide(Driver driver)
         {
-            Console.WriteLine("Feature to complete rides coming soon.");
+            var acceptedRides = RideManager.AllRides
+                    .Where(r => r.Driver == driver && r.Status == RideStatus.Accepted)
+                    .ToList();
+
+            if (!acceptedRides.Any())
+            {
+                Console.WriteLine("No rides to complete.");
+                Console.ReadLine();
+                return;
+            }
+            Console.Write("Enter Ride ID to complete: ");
+            if (int.TryParse(Console.ReadLine(), out int rideId))
+            {
+                var ride = acceptedRides.FirstOrDefault(r => r.Id == rideId);
+                if (ride != null)
+                {
+                    ride.Status = RideStatus.Completed;
+                    ride.IsCompleted = true;
+
+                    driver.Earnings += ride.Fare;
+                    ride.Passenger.WalletBalance -= ride.Fare;
+
+                    Console.WriteLine("Ride completed.");
+                }
+                else
+                {
+                    Console.WriteLine("Ride not found.");
+                }
+            }
+            else
+            {
+                Console.WriteLine("Invalid Ride ID");
+            }
+                
             Console.ReadLine();
         }
 
@@ -126,10 +203,27 @@ namespace RideSharingSystem
                 }
             }
         }
-        public Ride RequestRide(Location pickup, Location dropoff)
+        public static void RequestRide(Passenger passenger)
         {
-           
+            Console.Write("Enter pickup location: ");
+            string pickupName = Console.ReadLine();
+
+            Console.Write("Enter dropoff location: ");
+            string dropoffName = Console.ReadLine();
+
+            var pickup = new Location(pickupName);
+            var dropoff = new Location(dropoffName);
+
+            var ride = passenger.RequestRide(pickup, dropoff);
+
+            if (ride != null)
+            {
+                RideManager.AllRides.Add(ride);
+            }
+
+            Console.ReadLine();
         }
+
         public static void ViewWallet(Passenger passenger)
         {
             Console.WriteLine($"Your wallet balance: R{passenger.WalletBalance:F2}");
