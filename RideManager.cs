@@ -10,6 +10,7 @@ namespace RideSharingSystem
     public class RideManager
     {
         public static string RideFilePath = "rides.txt";
+        public static List<Ride> AllRides { get; set; } = new List<Ride>();
 
         public static string RidesCSV(Ride ride)
         {
