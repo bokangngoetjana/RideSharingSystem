@@ -40,8 +40,8 @@ namespace RideSharingSystem
 
             var passenger = passengers.FirstOrDefault(p => p.Username == passengerUsername);
             var driver = string.IsNullOrEmpty(driverUsername) ? null : drivers.FirstOrDefault(d => d.Username == driverUsername);
-            var pickupLoc = locations.FirstOrDefault(l => l.Name == pickupName);
-            var dropoffLoc = locations.FirstOrDefault(l => l.Name == dropoffName);
+            var pickupLoc = new Location(pickupName);
+            var dropoffLoc = new Location(dropoffName);
 
             if (passenger == null)
                 throw new Exception($"Passenger '{passengerUsername}' not found.");
