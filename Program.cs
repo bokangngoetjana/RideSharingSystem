@@ -12,11 +12,11 @@ namespace RideSharingSystem
             // Initial loading of data (locations, users)
             List<Location> locations = new List<Location>
             {
-                new Location("pta"),
-                new Location("jhb"),
-                new Location("pe"),
-                new Location("dbn"),
-                new Location("cpt")
+                new Location("Pretoria"),
+                new Location("Johannesburg"),
+                new Location("Gqeberha"),
+                new Location("Durban"),
+                new Location("Cape Town")
             };
             while (true)
             {

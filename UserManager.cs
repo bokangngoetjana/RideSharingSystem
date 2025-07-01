@@ -84,6 +84,8 @@ namespace RideSharingSystem
                    Regex.IsMatch(password, @"[0-9]") && // At least one digit
                    Regex.IsMatch(password, @"[\W_]");   // At least one special character
         }
+
+        // hashes the password
         private static string HashPassword(string password)
         {
             using (SHA256 sha256 = SHA256.Create())
@@ -107,7 +109,7 @@ namespace RideSharingSystem
                 Console.WriteLine("No users registered yet.");
                 return null;
             }
-            Console.Write("Enter username: ");
+            Console.Write("Enter email: ");
             string username = Console.ReadLine();
 
             Console.Write("Enter password: ");
@@ -116,6 +118,7 @@ namespace RideSharingSystem
 
             var lines =File.ReadAllLines(filePath);
 
+            //splits the content inside the file by a comma and stores them as an array of strings
             foreach (var line in lines)
             {
                 var parts = line.Split(',');

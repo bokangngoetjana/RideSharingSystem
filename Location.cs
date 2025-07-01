@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace RideSharingSystem
+﻿namespace RideSharingSystem
 {
     public class Location
     {

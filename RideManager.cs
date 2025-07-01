@@ -13,11 +13,15 @@ namespace RideSharingSystem
         public static int NextRideId = 1;
         public static List<Ride> AllRides { get; set; } = new List<Ride>();
 
+        //the information saved in the ride_history.txt file
         public static string RidesCSV(Ride ride)
         {
             return $"{ride.Id},{ride.Passenger.Username},{ride.Driver?.Username ?? ""},{ride.PickUpLocation.Name},{ride.DropOffLocation.Name},{ride.Fare},{ride.Status},{ride.IsCompleted}";
         }
 
+        /**Parses a CSV line from `ride_history.txt` into a `Ride` object by resolving passenger, driver, 
+         * locations, fare, status, and completion status from the provided lists.
+         */
         public static Ride RideFromCsv(string line, List<Passenger> passengers, List<Driver> drivers, List<Location> locations)
         {
             var parts = line.Split(',');
@@ -56,7 +60,8 @@ namespace RideSharingSystem
                 IsCompleted = isCompleted,
             };
         }
-        // Load all rides from file, resolving references
+
+        // Load all rides from ride_history.txt
         public static List<Ride> LoadAllRides(List<Passenger> passengers, List<Driver> drivers, List<Location> locations)
         {
             var rides = new List<Ride>();
@@ -94,6 +99,8 @@ namespace RideSharingSystem
             var line = RidesCSV(ride);
             File.AppendAllLines(RideFilePath, new[] { line });
         }
+
+        // updates rides if the status changes and IsCompleted is true
         public static void UpdateRideInHistory(Ride updatedRide)
         {
             string filePath = "ride_history.txt";

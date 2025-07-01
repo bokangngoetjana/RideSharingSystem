@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace RideSharingSystem
 {
@@ -63,37 +62,8 @@ namespace RideSharingSystem
                 }
             }
         }
-        public static void ViewCompletedRides(Driver driver)
-        {
-            try
-            {
-                var completedRides = RideManager.AllRides
-                    .Where(r => r.Driver != null && r.Driver.Username == driver.Username && r.IsCompleted)
-                    .ToList();
 
-                if (!completedRides.Any())
-                {
-                    Console.WriteLine("You have no completed rides.");
-                }
-                else
-                {
-                    Console.WriteLine("=== Completed Rides ===");
-                    foreach (var ride in completedRides)
-                    {
-                        Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pickup: {ride.PickUpLocation.Name}, Dropoff: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}, Status: {ride.Status}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred while fetching completed rides.");
-                Console.WriteLine($"Details: {ex.Message}");
-            }
-
-            Console.WriteLine("Press Enter to continue...");
-            Console.ReadLine();
-        }
-
+        //Driver menu method implementation
         public static void ViewAvailableRides(Driver driver)
         {
             var pendingRides = RideManager.AllRides
@@ -106,14 +76,13 @@ namespace RideSharingSystem
             }
             else
             {
-                foreach(var ride in pendingRides)
+                foreach (var ride in pendingRides)
                 {
                     Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pick-up: {ride.PickUpLocation.Name}, Drop-off: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}");
                 }
             }
-                Console.ReadLine();
+            Console.ReadLine();
         }
-
         public static void AcceptRide(Driver driver)
         {
             var pendingRides = RideManager.AllRides
@@ -156,7 +125,6 @@ namespace RideSharingSystem
             }
             Console.ReadLine();
         }
-
         public static void CompleteRide(Driver driver)
         {
             var acceptedRides = RideManager.AllRides
@@ -179,7 +147,7 @@ namespace RideSharingSystem
                     ride.IsCompleted = true;
 
                     driver.SaveEarnings();
-                    RideManager.UpdateRideInHistory (ride);
+                    RideManager.UpdateRideInHistory(ride);
                     Console.WriteLine("Ride completed.");
                 }
                 else
@@ -191,7 +159,37 @@ namespace RideSharingSystem
             {
                 Console.WriteLine("Invalid Ride ID");
             }
-                
+
+            Console.ReadLine();
+        }
+        public static void ViewCompletedRides(Driver driver)
+        {
+            try
+            {
+                var completedRides = RideManager.AllRides
+                    .Where(r => r.Driver != null && r.Driver.Username == driver.Username && r.IsCompleted)
+                    .ToList();
+
+                if (!completedRides.Any())
+                {
+                    Console.WriteLine("You have no completed rides.");
+                }
+                else
+                {
+                    Console.WriteLine("=== Completed Rides ===");
+                    foreach (var ride in completedRides)
+                    {
+                        Console.WriteLine($"Ride ID: {ride.Id}, Passenger: {ride.Passenger.Name}, Pickup: {ride.PickUpLocation.Name}, Dropoff: {ride.DropOffLocation.Name}, Fare: R{ride.Fare:F2}, Status: {ride.Status}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while fetching completed rides.");
+                Console.WriteLine($"Details: {ex.Message}");
+            }
+
+            Console.WriteLine("Press Enter to continue...");
             Console.ReadLine();
         }
 
@@ -200,8 +198,7 @@ namespace RideSharingSystem
             Console.WriteLine($"Total Earnings: R{driver.Earnings:F2}");
             Console.ReadLine();
         }
-
-        //Passenger menu
+        //passenger menu
         public static void PassengerMenu(Passenger passenger)
         {
             while (true)
@@ -245,6 +242,27 @@ namespace RideSharingSystem
                 }
             }
         }
+
+        //Passenger menu method implementation
+        public static void ViewWallet(Passenger passenger)
+        {
+            Console.WriteLine($"Your wallet balance: R{passenger.WalletBalance:F2}");
+            Console.ReadLine();
+        }
+        public static void AddFunds(Passenger passenger)
+        {
+            Console.Write("Enter amount to add: ");
+            if (decimal.TryParse(Console.ReadLine(), out decimal amount) && amount > 0)
+            {
+                passenger.WalletBalance += amount;
+                Console.WriteLine($"Added R{amount:F2} to wallet.");
+            }
+            else
+            {
+                Console.WriteLine("Invalid amount.");
+            }
+            Console.ReadLine();
+        }
         public static void RequestRide(Passenger passenger)
         {
             Console.Write("Enter pickup location: ");
@@ -263,26 +281,6 @@ namespace RideSharingSystem
                 RideManager.AllRides.Add(ride);
             }
 
-            Console.ReadLine();
-        }
-
-        public static void ViewWallet(Passenger passenger)
-        {
-            Console.WriteLine($"Your wallet balance: R{passenger.WalletBalance:F2}");
-            Console.ReadLine();
-        }
-        public static void AddFunds(Passenger passenger)
-        {
-            Console.Write("Enter amount to add: ");
-            if (decimal.TryParse(Console.ReadLine(), out decimal amount) && amount > 0)
-            {
-                passenger.WalletBalance += amount;
-                Console.WriteLine($"Added R{amount:F2} to wallet.");
-            }
-            else
-            {
-                Console.WriteLine("Invalid amount.");
-            }
             Console.ReadLine();
         }
         public static void ViewRideHistory(Passenger passenger)
