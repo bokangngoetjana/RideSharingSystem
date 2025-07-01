@@ -126,14 +126,13 @@ namespace RideSharingSystem
                 }
             }
         }
-        public static void RequestRide(Passenger passenger)
+        public Ride RequestRide(Location pickup, Location dropoff)
         {
-            Console.WriteLine("??");
-            Console.ReadLine();
+           
         }
         public static void ViewWallet(Passenger passenger)
         {
-            Console.WriteLine($"Your wallet balance: ${passenger.WalletBalance:F2}");
+            Console.WriteLine($"Your wallet balance: R{passenger.WalletBalance:F2}");
             Console.ReadLine();
         }
         public static void AddFunds(Passenger passenger)
@@ -142,7 +141,7 @@ namespace RideSharingSystem
             if (decimal.TryParse(Console.ReadLine(), out decimal amount) && amount > 0)
             {
                 passenger.WalletBalance += amount;
-                Console.WriteLine($"Added ${amount:F2} to wallet.");
+                Console.WriteLine($"Added R{amount:F2} to wallet.");
             }
             else
             {
@@ -160,7 +159,7 @@ namespace RideSharingSystem
             {
                 foreach (var ride in passenger.RideHistory)
                 {
-                    Console.WriteLine($"Ride ID: {ride.Id}, Driver: {ride.Driver?.Name}, Fare: ${ride.Fare}, Completed: {ride.IsCompleted}");
+                    Console.WriteLine($"Ride ID: {ride.Id}, Driver: {ride.Driver?.Name}, Fare: R{ride.Fare}, Completed: {ride.IsCompleted}");
                 }
             }
             Console.ReadLine();

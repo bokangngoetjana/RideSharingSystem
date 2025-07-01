@@ -78,7 +78,7 @@ namespace RideSharingSystem
         {
             var lines = rides.Select(r => RidesCSV(r)).ToArray();
             File.WriteAllLines(RideFilePath, lines);
-        }
+        } 
 
         // Add a new ride (append)
         public static void AddRide(Ride ride)
